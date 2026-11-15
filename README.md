@@ -1,4 +1,4 @@
-# ARO – All Races Open
+# All Races Open [ARO]
 
 A mod for **Need for Speed: Most Wanted (2012)** on PC.
 
