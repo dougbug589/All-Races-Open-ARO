@@ -98,7 +98,8 @@ static int g_sortMode = 0;   // 0 distance, 1 name
 
 struct NameCache { int evId; char name[64]; char type[32]; };
 static NameCache g_nc[256]; static int g_nnc = 0;
-static const char* g_types[] = { "All types", "Sprint", "Circuit", "Speed Run", "Ambush", "Most Wanted", "Other" };
+static const char* g_types[] = { "All types", "Sprint", "Circuit", "Speed Run", "Ambush", "Drift Attack", "Smash And Grab", "Most Wanted", "Other" };
+static const int kTypeCount = sizeof g_types / sizeof g_types[0];
 
 static void titleCase(char* s) {
     bool start = true;
@@ -110,12 +111,10 @@ static void titleCase(char* s) {
 }
 
 static int typeIndex(const char* t) {
-    if (!strcmp(t, "Most Wanted")) return 5;
-    if (strstr(t, "Sprint")) return 1;
-    if (strstr(t, "Circuit")) return 2;
+    if (!strcmp(t, "Most Wanted")) return 7;
+    for (int i = 1; i <= 6; i++) if (strstr(t, g_types[i])) return i;
     if (strstr(t, "Speed")) return 3;
-    if (strstr(t, "Ambush")) return 4;
-    return 6;
+    return kTypeCount - 1;
 }
 
 static const char* carName(int id) { const cars::Car* c = cars::find(id); return c ? c->name : nullptr; }
@@ -213,13 +212,23 @@ static void DrawMenu() {
     if (!np) ImGui::TextDisabled("Tick races below (up to %d). They appear first in EasyDrive > Races.", races::kMaxPins);
     for (int i = 0; i < np; i++) {
         const char* nm = "?"; for (int k = 0; k < n; k++) if (g_ev[k].evId == pins[i]) nm = names(g_ev[k]).name;
-        if (i) ImGui::SameLine();
-        ImGui::PushID(1000 + i);
         char lbl[96]; snprintf(lbl, sizeof lbl, "%s  x", nm);
+        if (i) {                                   // wrap onto a new line when the tag doesn't fit
+            float w = ImGui::CalcTextSize(lbl).x + ImGui::GetStyle().FramePadding.x * 2;
+            float right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+            ImGui::SameLine();
+            if (ImGui::GetCursorScreenPos().x + w > right) ImGui::NewLine();
+        }
+        ImGui::PushID(1000 + i);
         if (ImGui::SmallButton(lbl)) races::togglePin(pins[i]);
         ImGui::PopID();
     }
-    if (np) { ImGui::SameLine(); if (ImGui::SmallButton("Clear all")) races::clearPins(); }
+    if (np) {
+        float right = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+        ImGui::SameLine();
+        if (ImGui::GetCursorScreenPos().x + ImGui::CalcTextSize("Clear all").x + 12 > right) ImGui::NewLine();
+        if (ImGui::SmallButton("Clear all")) races::clearPins();
+    }
 
     // Races
     ImGui::SeparatorText("Races");
@@ -230,7 +239,7 @@ static void DrawMenu() {
     const char* shows[] = { "All races", "My car's races", myClassLbl };
     ImGui::Combo("##show", &g_show, shows, 3);
     ImGui::SameLine(); ImGui::SetNextItemWidth(150);
-    ImGui::Combo("##type", &g_typeSel, g_types, 7);
+    ImGui::Combo("##type", &g_typeSel, g_types, kTypeCount);
     ImGui::SameLine(); ImGui::SetNextItemWidth(150);
     ImGui::Combo("##sort", &g_sortMode, "Nearest first\0By name\0");
 
@@ -277,7 +286,7 @@ static void DrawMenu() {
             if (e.mine) ImGui::TextColored(ImVec4(1.0f, 0.72f, 0.2f, 1), "%s", nc.name); else ImGui::TextUnformatted(nc.name);
             if (ImGui::IsItemHovered()) { char cars[400]; carsText(e, cars, sizeof cars); ImGui::SetTooltip("Originally for: %s", cars[0] ? cars : "?"); }
             ImGui::TableSetColumnIndex(2);
-            if (typeIndex(nc.type) == 5) ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.3f, 1), "%s", nc.type); else ImGui::TextUnformatted(nc.type);
+            if (typeIndex(nc.type) == 7) ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.3f, 1), "%s", nc.type); else ImGui::TextUnformatted(nc.type);
             ImGui::TableSetColumnIndex(3);
             if (e.distKm >= 0) ImGui::Text("%.1f km", e.distKm); else ImGui::TextDisabled("-");
             ImGui::PopID();
