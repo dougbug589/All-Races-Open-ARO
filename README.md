@@ -24,7 +24,8 @@ A mod for **Need for Speed: Most Wanted (2012)** on PC.
 1. **ASI loader:** download `Ultimate-ASI-Loader.zip` (the 32-bit one, not `_x64`) from
    [ThirteenAG's Ultimate ASI Loader releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest)
    and put its `dinput8.dll` in the game folder, next to `NFS13.exe`.
-2. **ARO:** copy `ARO.asi` and `ARO.ini` into the game's `scripts` folder (create it if it's missing).
+2. **ARO:** copy the `scripts` folder (with `ARO.asi` and `ARO.ini` inside) into the game folder.
+   If the game already has a `scripts` folder, just merge them.
 3. **Linux / Steam Deck (Proton) only:** set the game's launch options to
    `WINEDLLOVERRIDES="dinput8=n,b" %command%` so Proton uses the loader.
 
@@ -33,7 +34,7 @@ Play offline: don't take a modded game into online events.
 
 ## Build
 
-`./build.sh` (needs `mingw-w64-gcc`). `tools/gen_cars.py "<game folder>"` regenerates
+`./build.sh` (needs `mingw-w64-gcc`) builds `dist/scripts/ARO.asi`; `dist/scripts/` is ready to copy into the game folder. `tools/gen_cars.py "<game folder>"` regenerates
 `src/cars.inc` from the game's own vehicle list and English text.
 
 ## Credits and licence
