@@ -11,6 +11,7 @@ Normally each car only gets its own few races. ARO opens every race to every car
 - Parts still only come from winning a race in the car it was made for
 - F5 menu lists all 93 races with name and type and distance
 - Search and filter races or pin up to 8 to the top of EasyDrive > Races
+- Works with mouse or keyboard or gamepad
 - Choose your opponents from your class or any class or a real world match with similar power to weight
 - Most Wanted races and jack spots and parked cars are left alone
 
@@ -33,7 +34,9 @@ Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-
 2. Unzip `ARO.zip` into the game folder so the `scripts` folder lands there
 3. On Linux or Steam Deck set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`
 
-Press F5 in free roam to open the menu  
+Press F5 in free roam to open the menu or L3+R3 on a gamepad  
+Use the arrows and Enter or the D-pad and A to move and pick and Esc or B to close  
+The game ignores your keys and buttons while the menu is open  
 Settings live in `scripts/ARO.ini`  
 Play offline with mods
 
