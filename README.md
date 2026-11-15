@@ -54,7 +54,18 @@ Play offline with it.
 You need `mingw-w64-gcc`. Run `./build.sh` and the files end up in `dist/scripts/`.
 `tools/gen_cars.py` rebuilds the car list from the game files. Notes on the game internals are in `NOTES.md`.
 
+## AI use
+
+This mod was made with a lot of help from AI (Claude, by Anthropic). To be clear about who did what:
+
+- **Claude** wrote most of the code, dug through the game's code to find how races and opponents work,
+  and wrote these docs.
+- **I** came up with the idea and features, decided what goes in and what doesn't, tested everything
+  in game, found the bugs (like the jack spot one) and checked every fix.
+
+Everything in the release has been played and tested by me, but keep in mind it was mostly written by AI.
+
 ## Credits
 
 MIT licence. Uses [Dear ImGui](https://github.com/ocornut/imgui) and [miniz](https://github.com/richgel999/miniz)
-(both MIT). Made with help from Claude.
+(both MIT).
