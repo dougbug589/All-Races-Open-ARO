@@ -4,7 +4,7 @@
 // intro cutscenes, and also parked jack-spot cars in free roam. ARO only swaps real race opponents:
 //   - never the player's slot or the car the player is driving (cutscenes use other slots),
 //   - never Most Wanted boss racers (when KeepMostWantedBoss=1),
-//   - never cars spawned from callers listed as "keep" (jack spots, see LogCallers in the log).
+//   - never cars that aren't entered in a race (participant id -1: jack spots and parked cars).
 #include "opponents.h"
 #include "core.h"
 #include "cars.h"
@@ -137,6 +137,7 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     if (!core::cfg.randomOpponents) keep = "off";
     else if (!orig) keep = "not a racer car";
     else if (car == g_player) keep = "your car (cutscene)";
+    else if (*(int*)(self + slot * kSlotStride + kSlotPlayerId) == -1) keep = "not in a race (jack spot / parked car)";
     else if (core::cfg.keepMostWanted && *(int*)(self + slot * kSlotStride + kSlotDriver) == kBossDriver) keep = "Most Wanted boss";
     else if (!me) keep = "your car is unknown";
     if (keep) { g_slots[slot] = {}; log("[opponents] slot %d keeps %d (%s) - %s", slot, car, orig ? orig->name : "?", keep); return oSet(self, slot, car, paint, flag); }
@@ -156,7 +157,7 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     int newPaint = core::cfg.randomPaint ? randomPaint() : 0;
     if (pick == car && !newPaint) newPaint = paint;
     s = { car, pick, newPaint, now };
-    log("[opponents] slot %d: %s -> %s (caller %08X)", slot, orig->name, cars::find(pick) ? cars::find(pick)->name : "?", ret);
+    log("[opponents] slot %d (racer %d): %s -> %s", slot, *(int*)(self + slot * kSlotStride + kSlotPlayerId), orig->name, cars::find(pick) ? cars::find(pick)->name : "?");
     return oSet(self, slot, pick, newPaint, flag);
 }
 

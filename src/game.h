@@ -36,7 +36,7 @@ constexpr u32 kAttrEasyDriveEvent = 0x5F3F3;
 
 // ---- racer slots (SetSlotVehicle "this") ----
 constexpr u32 kSlotStride   = 0x1C40;
-constexpr u32 kSlotPlayerId = 0x4AD0;      // this + slot*stride + ...
+constexpr u32 kSlotPlayerId = 0x4AD0;      // this + slot*stride + ...: race participant id (-1 = not racing, 0 = you)
 constexpr u32 kSlotDriver   = 0x3050 + 0x1A34;
 constexpr int kBossDriver   = 1442225;     // Most Wanted boss racer driver profile
 
