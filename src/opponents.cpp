@@ -104,9 +104,21 @@ static void noteCaller(unsigned ret, int slot, int car, uint8_t* self, const voi
         *(int*)(sl + 0x1A80), *(int*)(sl + 0x1A34), b);
 }
 
-// ---- slot memory: the game re-applies a slot's car at times; keep our choice
-struct SlotPick { int original, chosen, paint; DWORD at; };
-static SlotPick g_slots[32];
+// ---- choices per race participant: the game re-requests a racer's original car when it respawns
+// (wreck, reset); that racer must get the same car back, never a new one mid-race.
+struct Pick { int racer, original, chosen, paint; DWORD at; };
+static Pick g_picks[64]; static int g_nPicks;
+static Pick* findPick(int racer, int original) {
+    for (int i = 0; i < g_nPicks; i++)
+        if (g_picks[i].racer == racer && (g_picks[i].original == original || g_picks[i].chosen == original)) return &g_picks[i];
+    return nullptr;
+}
+static Pick* newPick(int racer) {
+    for (int i = 0; i < g_nPicks; i++) if (g_picks[i].racer == racer) return &g_picks[i];   // same racer, new race
+    if (g_nPicks < 64) return &g_picks[g_nPicks++];
+    Pick* oldest = &g_picks[0]; for (int i = 1; i < g_nPicks; i++) if (g_picks[i].at < oldest->at) oldest = &g_picks[i];
+    return oldest;
+}
 
 static bool isPlayerSlot(uint8_t* self, int slot) {
     if (slot == 0) return true;
@@ -127,7 +139,7 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     noteCaller(ret, slot, car, self, __builtin_frame_address(0));
     if (isPlayerSlot(self, slot)) {
         if (car != g_player) { const cars::Car* c = cars::find(car); log("[player] %s (%s)", c ? c->name : "?", c ? cars::className(c->cls) : "?"); }
-        g_player = car; g_slots[slot] = {};
+        g_player = car;
         return oSet(self, slot, car, paint, flag);
     }
     learnPaint(paint, car);
@@ -140,12 +152,15 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     else if (*(int*)(self + slot * kSlotStride + kSlotPlayerId) == -1) keep = "not in a race (jack spot / parked car)";
     else if (core::cfg.keepMostWanted && *(int*)(self + slot * kSlotStride + kSlotDriver) == kBossDriver) keep = "Most Wanted boss";
     else if (!me) keep = "your car is unknown";
-    if (keep) { g_slots[slot] = {}; log("[opponents] slot %d keeps %d (%s) - %s", slot, car, orig ? orig->name : "?", keep); return oSet(self, slot, car, paint, flag); }
+    if (keep) { log("[opponents] slot %d keeps %d (%s) - %s", slot, car, orig ? orig->name : "?", keep); return oSet(self, slot, car, paint, flag); }
 
     DWORD now = GetTickCount();
-    SlotPick& s = g_slots[slot];
-    if (s.chosen && car == s.chosen) { s.at = now; return oSet(self, slot, car, s.paint, flag); }
-    if (s.chosen && car == s.original && now - s.at < 30000) { s.at = now; return oSet(self, slot, s.chosen, s.paint, flag); }
+    int racer = *(int*)(self + slot * kSlotStride + kSlotPlayerId);
+    int state = *(int*)(self + slot * kSlotStride + kSlotState);              // 1 = fresh spawn, 3 = respawn
+    if (Pick* p = findPick(racer, car)) {
+        // respawns always get the same car; a fresh spawn reuses it only right after (intro cutscene -> race)
+        if (state != 1 || now - p->at < 60 * 1000) { p->at = now; return oSet(self, slot, p->chosen, p->paint, flag); }
+    }
 
     if (now - g_lastPick > 8000) g_nRecent = 0;
     g_lastPick = now;
@@ -156,7 +171,7 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     if (g_nRecent < 16) g_recent[g_nRecent++] = pick;
     int newPaint = core::cfg.randomPaint ? randomPaint() : 0;
     if (pick == car && !newPaint) newPaint = paint;
-    s = { car, pick, newPaint, now };
+    *newPick(racer) = { racer, car, pick, newPaint, now };
     log("[opponents] slot %d (racer %d): %s -> %s", slot, *(int*)(self + slot * kSlotStride + kSlotPlayerId), orig->name, cars::find(pick) ? cars::find(pick)->name : "?");
     return oSet(self, slot, pick, newPaint, flag);
 }

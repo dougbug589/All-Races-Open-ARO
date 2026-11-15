@@ -38,6 +38,7 @@ constexpr u32 kAttrEasyDriveEvent = 0x5F3F3;
 constexpr u32 kSlotStride   = 0x1C40;
 constexpr u32 kSlotPlayerId = 0x4AD0;      // this + slot*stride + ...: race participant id (-1 = not racing, 0 = you)
 constexpr u32 kSlotDriver   = 0x3050 + 0x1A34;
+constexpr u32 kSlotState    = 0x3050 + 0x1A74;  // 1 = fresh spawn, 3 = respawn (seen in logs)
 constexpr int kBossDriver   = 1442225;     // Most Wanted boss racer driver profile
 
 // ---- functions (address, expected first bytes) ----

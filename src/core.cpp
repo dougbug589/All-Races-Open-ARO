@@ -13,7 +13,10 @@ static char g_modDir[MAX_PATH], g_gameDir[MAX_PATH];
 
 void logInit(const char* path, bool enabled) {
     InitializeCriticalSection(&g_logLock);
-    if (enabled) g_log = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (!enabled) return;
+    char prev[MAX_PATH]; snprintf(prev, sizeof prev, "%s.1", path);
+    MoveFileExA(path, prev, MOVEFILE_REPLACE_EXISTING);              // keep the previous session's log
+    g_log = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 }
 
 void log(const char* fmt, ...) {
