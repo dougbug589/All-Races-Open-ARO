@@ -19,6 +19,11 @@ A mod for **Need for Speed: Most Wanted (2012)** on PC.
 | ![F5 menu: every race with name, type and distance](assets/menu.png) | ![Filter: your car's own races](assets/my-car-races.png) |
 | ![Pin up to 8 races](assets/pinning.png) | ![Pinned races at the top of EasyDrive](assets/easydrive-pins.png) |
 
+## Download
+
+Get **`ARO.zip`** from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest).
+It contains a `scripts` folder with `ARO.asi` and `ARO.ini`.
+
 ## Install
 
 1. **ASI loader:** download `Ultimate-ASI-Loader.zip` (the 32-bit one, not `_x64`) from
