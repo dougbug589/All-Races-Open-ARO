@@ -76,5 +76,6 @@ Everything here was played and tested by me but most of it was written by AI
 
 ## Credits
 
+Inspired by [OpenRaces](https://github.com/HungryManticore/MW2012-Open-Races) by HungryManticore. ARO is written from scratch and shares no code with it  
 MIT licence  
 Uses [Dear ImGui](https://github.com/ocornut/imgui) and [miniz](https://github.com/richgel999/miniz) which are both MIT
