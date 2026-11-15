@@ -1,5 +1,7 @@
 # All Races Open [ARO]
 
+By freemanHL
+
 A mod for Need for Speed Most Wanted (2012) on PC
 
 Normally each car only gets its own few races. ARO opens every race to every car and adds an F5 menu to find and pick races
@@ -26,19 +28,21 @@ Normally each car only gets its own few races. ARO opens every race to every car
 
 ## Download
 
-Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest)
+Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest)  
+It has the `scripts` folder and ThirteenAG's [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) (`dinput8.dll`) so there's nothing else to download
 
 ## Install
 
-1. Download the 32-bit `Ultimate-ASI-Loader.zip` from [ThirteenAG's releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest) and put `dinput8.dll` next to `NFS13.exe`
-2. Unzip `ARO.zip` into the game folder so the `scripts` folder lands there
-3. On Linux or Steam Deck set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`
+1. Drag the `scripts` folder and `dinput8.dll` into the game folder where `NFS13.exe` is
+2. On Linux or Steam Deck set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`
 
 Press F5 in free roam to open the menu or L3+R3 on a gamepad  
 Use the arrows and Enter or the D-pad and A to move and pick and Esc or B to close  
 The game ignores your keys and buttons while the menu is open  
 Settings live in `scripts/ARO.ini`  
 Play offline with mods
+
+Made and tested on CachyOS with an NVIDIA GPU using the proton-cachyos-slr runner
 
 ## Known issues
 
