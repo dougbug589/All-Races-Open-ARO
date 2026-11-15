@@ -1,73 +1,60 @@
 # All Races Open [ARO]
 
-A mod for **Need for Speed: Most Wanted (2012)** on PC.
+A mod for Need for Speed: Most Wanted (2012) on PC.
 
-- **Every race for every car.** All races appear on the map for whatever car you drive; free-roam
-  markers show the 20 races nearest to you and follow you around.
-- **Parts stay fair.** Parts are only awarded when a race is run in one of the cars it was made for;
-  in any other car you still earn Speed Points.
-- **F5 race menu.** Every race with its real name and type, search, filters (your car's races, your
-  class's races, race type) and sorting. Pin up to 8 races to the top of **EasyDrive › Races**.
-- **Opponents you choose.** Race opponents get random cars from your class, from any class you pick,
-  or a **real-world match**: rivals with the closest real power-to-weight to your car.
-- Most Wanted races keep their boss car. Parked jack-spot cars and intro cutscenes are left alone.
+In the normal game each car only gets its own handful of races. ARO opens every race to every car,
+and adds a small menu (F5) so you can find and pick races easily.
+
+## What it does
+
+- Every race works with every car. The map shows the 20 races closest to you.
+- You still only get parts when you win a race in the car it was made for. Other cars get Speed Points.
+- F5 menu with all 93 races: names, types, distance, search and filters.
+- Pin up to 8 races and they show up at the top of EasyDrive > Races.
+- Pick who you race against: cars from your class, any class you want, or "real-world match"
+  (cars with similar real-life power-to-weight to yours).
+- Most Wanted races, jack spots and parked cars are left alone.
 
 ## Screenshots
 
 | | |
 |---|---|
-| ![F5 menu: every race with name, type and distance](assets/menu.png) | ![Filter: your car's own races](assets/my-car-races.png) |
-| ![Pin up to 8 races](assets/pinning.png) | ![Pinned races at the top of EasyDrive](assets/easydrive-pins.png) |
+| ![F5 menu](assets/menu.png) | ![Your car's races](assets/my-car-races.png) |
+| ![Pinning races](assets/pinning.png) | ![Pinned races in EasyDrive](assets/easydrive-pins.png) |
 
 ## Download
 
-Get **`ARO.zip`** from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest).
-It contains a `scripts` folder with `ARO.asi` and `ARO.ini`.
+Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest).
 
 ## Install
 
-1. **ASI loader:** download `Ultimate-ASI-Loader.zip` (the 32-bit one, not `_x64`) from
-   [ThirteenAG's Ultimate ASI Loader releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest)
-   and put its `dinput8.dll` in the game folder, next to `NFS13.exe`.
-2. **ARO:** copy the `scripts` folder (with `ARO.asi` and `ARO.ini` inside) into the game folder.
-   If the game already has a `scripts` folder, just merge them.
-3. **Linux / Steam Deck (Proton) only:** set the game's launch options to
-   `WINEDLLOVERRIDES="dinput8=n,b" %command%` so Proton uses the loader.
+1. Get `Ultimate-ASI-Loader.zip` (the 32-bit one) from
+   [ThirteenAG's releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest)
+   and put `dinput8.dll` next to `NFS13.exe`.
+2. Unzip `ARO.zip` into the game folder. It has a `scripts` folder inside.
+3. On Linux / Steam Deck, set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`.
 
-Press **F5** in free roam for the menu. Settings are in `ARO.ini`; ARO writes `ARO.log` next to it.
-Play offline: don't take a modded game into online events.
+Press F5 in free roam to open the menu. Settings are in `scripts/ARO.ini`.
+Play offline with it.
 
-## Known limitations and plans
+## Known issues
 
-### Opponent pace (AI that matches your car)
-ARO picks fair **cars** for your opponents, but it can't yet make the **drivers** match your car.
-In testing, a Bugatti opponent drove no faster than the Aston Martin it replaced, and real-world
-rivals for a fast car still fell behind. What we found so far:
+- The AI doesn't get faster when it gets a faster car. Opponents in fast cars can still fall behind.
+  I tried swapping their cars and even giving them the Most Wanted boss driver, and neither helped.
+  The game seems to limit AI speed somewhere in each race's settings, which I haven't found yet.
+- EasyDrive can only show 8 races, so you can only pin 8.
 
-- **The AI's pace isn't tied to its car.** Giving opponents faster cars changes little.
-- **It isn't the driver profile either.** Each racer has a driver profile, and Most Wanted bosses use
-  a stronger one. Giving every opponent the boss profile, before or during a race, made no difference.
-- **The limit is probably a race-wide rule**, such as the catch-up ("rubber band") system or a pace cap
-  in each race's AI settings. Those settings are stored as numeric IDs with no readable names, so
-  finding them means tracing the AI's code by hand.
-- **Experiments are risky.** Changing unknown race settings crashed the game while a race loaded.
+## Plans
 
-So AI that drives to your car's level is the main goal for a future version, but there's no
-release date: it depends on finding where the game decides how fast the AI may go.
+- AI that keeps up with your car (the big one)
+- Custom number of laps and opponents
 
-### Other plans
-- Custom **number of laps** and **number of opponents** per race (needs the same kind of research;
-  some races may have a fixed number of grid spots).
-- The game's **EasyDrive › Races** list shows at most 8 rows and doesn't scroll, so ARO's pins are
-  limited to 8. The F5 menu always lists every race.
+## Building
 
-## Build
+You need `mingw-w64-gcc`. Run `./build.sh` and the files end up in `dist/scripts/`.
+`tools/gen_cars.py` rebuilds the car list from the game files. Notes on the game internals are in `NOTES.md`.
 
-`./build.sh` (needs `mingw-w64-gcc`) builds `dist/scripts/ARO.asi`; `dist/scripts/` is ready to copy into the game folder. `tools/gen_cars.py "<game folder>"` regenerates
-`src/cars.inc` from the game's own vehicle list and English text.
+## Credits
 
-## Credits and licence
-
-ARO is MIT licensed (see `LICENSE`). It includes [Dear ImGui](https://github.com/ocornut/imgui) and the
-inflate part of [miniz](https://github.com/richgel999/miniz), both MIT (licences in `third_party/`).
-Written with the help of Claude (Anthropic).
+MIT licence. Uses [Dear ImGui](https://github.com/ocornut/imgui) and [miniz](https://github.com/richgel999/miniz)
+(both MIT). Made with help from Claude.
