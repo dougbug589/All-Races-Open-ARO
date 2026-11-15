@@ -16,6 +16,7 @@
 #include "cars.h"
 #include "races.h"
 #include "opponents.h"
+#include "input.h"
 namespace lang { bool load(const char* file); bool get(unsigned id, char* out, int outSize); }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
@@ -39,12 +40,16 @@ static bool isInputMsg(UINT m) {
     return (m >= WM_MOUSEFIRST && m <= WM_MOUSELAST) || (m >= WM_KEYFIRST && m <= WM_KEYLAST) || m == WM_INPUT;
 }
 
+static volatile bool g_justOpened = false, g_releaseGuard = false;
+static void setOpen(bool open) {
+    if (open == g_open) return;
+    g_open = open;
+    if (open) g_justOpened = true; else g_releaseGuard = true;   // keep the game blind until keys/buttons are let go
+    if (g_init) ImGui::GetIO().MouseDrawCursor = open;
+}
+
 static LRESULT CALLBACK WndProcHook(HWND h, UINT m, WPARAM w, LPARAM l) {
-    if (m == WM_KEYDOWN && w == VK_F5 && !(l & (1 << 30))) {
-        g_open = !g_open;
-        if (g_init) ImGui::GetIO().MouseDrawCursor = g_open;
-        return 0;
-    }
+    if (m == WM_KEYDOWN && w == VK_F5 && !(l & (1 << 30))) { setOpen(!g_open); return 0; }
     if (g_open && g_init) {
         ImGui_ImplWin32_WndProcHandler(h, m, w, l);
         if (isInputMsg(m)) return 0;   // keep menu clicks/keys away from the game while it is open
@@ -68,7 +73,7 @@ static void initImGui(IDXGISwapChain* sc) {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
     ImFont* f = nullptr;
     const char* fonts[] = { "C:\\windows\\Fonts\\arial.ttf", "C:\\windows\\Fonts\\tahoma.ttf", "C:\\windows\\Fonts\\segoeui.ttf" };
     for (const char* p : fonts) {
@@ -175,12 +180,19 @@ static void DrawMenu() {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.55f, io.DisplaySize.y * 0.82f), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-    if (!ImGui::Begin("ARO - All Races Open  (F5 to close)", nullptr, ImGuiWindowFlags_NoCollapse)) { ImGui::End(); return; }
+    if (g_justOpened) ImGui::SetNextWindowFocus();
+    if (!ImGui::Begin("ARO - All Races Open  (F5 or L3+R3 to close)", nullptr, ImGuiWindowFlags_NoCollapse)) { ImGui::End(); return; }
+    if (g_justOpened) { g_justOpened = false; ImGui::SetNavCursorVisible(true); }
+    // Esc / gamepad B closes the menu when nothing else (a dropdown, the search box) wants it
+    bool popup = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
+    if (!popup && !ImGui::IsAnyItemActive() &&
+        (ImGui::IsKeyPressed(ImGuiKey_Escape, false) || ImGui::IsKeyPressed(ImGuiKey_GamepadFaceRight, false))) setOpen(false);
 
     int car = races::playerCar();
     const char* myName = carName(car);
     int carCls = carClass(car);
     int pw = cars::powerToWeight(car);
+    ImGui::TextDisabled("Keyboard: arrows/Tab move, Enter/Space select, Esc close   Gamepad: D-pad move, A select, B close, L3+R3 open/close");
     ImGui::Text("Your car: %s", myName ? myName : "unknown");
     ImGui::SameLine(); ImGui::TextDisabled("%s%s", carCls >= 0 ? cars::className(carCls) : "", pw ? "" : "");
     if (pw) { ImGui::SameLine(); ImGui::TextDisabled("· about %d hp per tonne", pw); }
@@ -282,6 +294,9 @@ static void DrawMenu() {
             ImGui::TableSetColumnIndex(0);
             bool pinned = races::pinned(e.evId);
             if (ImGui::Checkbox("##pin", &pinned)) races::togglePin(e.evId);
+            if (ImGui::IsItemFocused() && ImGui::GetIO().NavVisible) {   // keyboard/gamepad: show the race's original cars
+                char cars[400]; carsText(e, cars, sizeof cars); ImGui::SetTooltip("%s\nOriginally for: %s", nc.name, cars[0] ? cars : "?");
+            }
             ImGui::TableSetColumnIndex(1);
             if (e.mine) ImGui::TextColored(ImVec4(1.0f, 0.72f, 0.2f, 1), "%s", nc.name); else ImGui::TextUnformatted(nc.name);
             if (ImGui::IsItemHovered()) { char cars[400]; carsText(e, cars, sizeof cars); ImGui::SetTooltip("Originally for: %s", cars[0] ? cars : "?"); }
@@ -296,8 +311,22 @@ static void DrawMenu() {
     ImGui::End();
 }
 
+// Gamepad: L3 + R3 (both sticks pressed) toggles the menu. Also keeps the game's input blocked
+// while the menu is open and until every key/button used to close it has been released.
+static void pollToggle() {
+    static bool wasDown = false;
+    bool down = false; XINPUT_STATE st;
+    for (int i = 0; i < 4; i++)
+        if (input::padState(i, &st) && (st.Gamepad.wButtons & (XINPUT_GAMEPAD_LEFT_THUMB | XINPUT_GAMEPAD_RIGHT_THUMB)) == (XINPUT_GAMEPAD_LEFT_THUMB | XINPUT_GAMEPAD_RIGHT_THUMB)) down = true;
+    if (down && !wasDown) setOpen(!g_open);
+    wasDown = down;
+    if (g_releaseGuard && !g_open && !input::anyHeld()) g_releaseGuard = false;
+    input::block(g_open || g_releaseGuard);
+}
+
 static HRESULT __stdcall hkPresent(IDXGISwapChain* sc, UINT sync, UINT flags) {
     if (!g_init && !g_failed) initImGui(sc);
+    pollToggle();
     if (g_init) {
         DXGI_SWAP_CHAIN_DESC sd; sc->GetDesc(&sd);
         if (sd.OutputWindow == g_hwnd) {
@@ -310,7 +339,7 @@ static HRESULT __stdcall hkPresent(IDXGISwapChain* sc, UINT sync, UINT flags) {
                 ImGui::SetNextWindowPos(ImVec2(20, 60));
                 ImGui::SetNextWindowBgAlpha(0.6f);
                 ImGui::Begin("##hint", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings);
-                ImGui::Text("ARO loaded - press F5");
+                ImGui::Text("ARO loaded - press F5 (or L3+R3 on a gamepad)");
                 ImGui::End();
             }
             ImGui::Render();

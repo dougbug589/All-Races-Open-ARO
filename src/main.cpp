@@ -5,6 +5,7 @@
 #include "core.h"
 #include "races.h"
 #include "opponents.h"
+#include "input.h"
 
 namespace menu { void start(); }
 namespace probe { void start(); }
@@ -16,6 +17,7 @@ static DWORD WINAPI worker(void*) {
     core::loadSettings(ini);
     core::logInit(log, true);
     core::log("ARO - All Races Open. Waiting for the game code to unpack...");
+    if (core::cfg.menu) input::install();          // before the game looks up its input functions
     // NFS13.exe is decrypted by its DRM stub after DLLs load: wait until the code we need is there.
     for (int i = 0; i < 12000 && !core::sigMatches(game::SetSlotVehicle.addr, game::SetSlotVehicle.sig); i++) Sleep(10);
     if (!core::sigMatches(game::SetSlotVehicle.addr, game::SetSlotVehicle.sig)) {
