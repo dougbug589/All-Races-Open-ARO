@@ -6,6 +6,7 @@
 namespace input {
 
 void install();                          // as early as possible (before the game looks up XInput)
+void patchGame();                        // after the game code is unpacked: catch pointers it already looked up
 void block(bool on);                     // true: the game sees no keys and a centred, idle gamepad
 bool padState(int index, XINPUT_STATE* out);   // read a gamepad directly (ignores the block)
 bool anyHeld();                          // any gamepad button or keyboard key still held?

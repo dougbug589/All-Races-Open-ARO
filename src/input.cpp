@@ -26,6 +26,14 @@ static DWORD WINAPI hkXGetState(DWORD i, XINPUT_STATE* s) {
     return r;
 }
 
+// XInputGetStateEx (hidden export, ordinal 100): same signature, also reports the Guide button.
+static XGetStateFn oXGetStateEx;
+static DWORD WINAPI hkXGetStateEx(DWORD i, XINPUT_STATE* s) {
+    DWORD r = oXGetStateEx(i, s);
+    if (g_block && r == ERROR_SUCCESS && s) memset(&s->Gamepad, 0, sizeof s->Gamepad);
+    return r;
+}
+
 bool padState(int index, XINPUT_STATE* out) {
     return oXGetState && oXGetState((DWORD)index, out) == ERROR_SUCCESS;
 }
@@ -101,10 +109,35 @@ bool anyHeld() {
     return false;
 }
 
+// The game may have looked XInput up before ARO loaded: replace every copy of the original
+// function pointers inside the game's own image (import table or cached pointers).
+static int replacePointers(void* from, void* to) {
+    if (!from) return 0;
+    uint8_t* base = (uint8_t*)GetModuleHandleA(nullptr);
+    auto* nt = (IMAGE_NT_HEADERS32*)(base + ((IMAGE_DOS_HEADER*)base)->e_lfanew);
+    uint32_t size = nt->OptionalHeader.SizeOfImage; int n = 0;
+    for (uint32_t page = 0; page < size; page += 0x1000) {
+      if (!core::readable(base + page, 0x1000)) continue;            // one check per 4 KB page
+      for (uint32_t off = page; off < page + 0x1000 && off + 4 <= size; off += 4) {
+        uint32_t* p = (uint32_t*)(base + off);
+        if (*p != (uint32_t)from) continue;
+        DWORD old; VirtualProtect(p, 4, PAGE_READWRITE, &old); *p = (uint32_t)to; VirtualProtect(p, 4, old, &old); n++;
+      }
+    }
+    return n;
+}
+
+void patchGame() {
+    int a = replacePointers((void*)oXGetState, (void*)hkXGetState);
+    int b = replacePointers((void*)oXGetStateEx, (void*)hkXGetStateEx);
+    core::log("[input] game XInput pointers redirected: XInputGetState %d, XInputGetStateEx %d", a, b);
+}
+
 void install() {
     HMODULE x = LoadLibraryA("xinput1_3.dll");
     if (x) {
         oXGetState = (XGetStateFn)patchExport(x, "XInputGetState", (void*)hkXGetState);
+        oXGetStateEx = (XGetStateFn)GetProcAddress(x, (LPCSTR)100);
         core::log(oXGetState ? "[input] XInput hooked" : "[input] XInputGetState not found");
     }
     hookDirectInput();

@@ -24,6 +24,7 @@ static DWORD WINAPI worker(void*) {
         core::log("This game version isn't supported (needs the Steam/Origin NFS13.exe, 13,684,056 bytes). Nothing was changed.");
         return 0;
     }
+    if (core::cfg.menu) input::patchGame();
     races::install();
     opponents::install();
     if (core::cfg.menu) menu::start();
