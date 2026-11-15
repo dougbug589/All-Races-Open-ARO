@@ -10,6 +10,7 @@
 #include "cars.h"
 #include "races.h"
 #include <string.h>
+#include <stdio.h>
 #include <vector>
 
 using namespace game;
@@ -77,10 +78,30 @@ static int pickRealWorld(int player) {
 // ---- callers
 struct Caller { unsigned ret; int count; };
 static Caller g_callers[32]; static int g_nCallers;
-static void noteCaller(unsigned ret, int slot, int car) {
-    for (int i = 0; i < g_nCallers; i++) if (g_callers[i].ret == ret) { g_callers[i].count++; return; }
-    if (g_nCallers < 32) g_callers[g_nCallers++] = { ret, 1 };
-    if (core::cfg.logCallers) log("[callers] new caller %08X (slot %d, car %d %s)", ret, slot, car, cars::find(car) ? cars::find(car)->name : "?");
+// Return addresses on the stack (values that point just after a call instruction in the game code).
+static int stackTrace(const void* sp, unsigned* out, int max) {
+    const unsigned* p = (const unsigned*)sp; int n = 0;
+    for (int i = 0; i < 512 && n < max; i++) {
+        if (!core::readable(p + i)) break;
+        unsigned v = p[i];
+        if (v < 0x401000 || v > 0xF82000 || !core::readable(v - 6, 6)) continue;
+        const uint8_t* c = (const uint8_t*)v;
+        if (c[-5] == 0xE8 || (c[-6] == 0xFF && (c[-5] == 0x15 || c[-5] == 0x90 || c[-5] == 0x92)) || (c[-2] == 0xFF && (c[-1] & 0xF8) == 0xD0) || (c[-3] == 0xFF && (c[-2] & 0xF8) == 0x50))
+            out[n++] = v;
+    }
+    return n;
+}
+static void noteCaller(unsigned ret, int slot, int car, uint8_t* self, const void* sp) {
+    if (!core::cfg.logCallers) return;
+    unsigned st[8]; int n = stackTrace(sp, st, 8);
+    unsigned key = 0; for (int i = 0; i < n; i++) key = key * 31 + st[i];
+    for (int i = 0; i < g_nCallers; i++) if (g_callers[i].ret == key) { g_callers[i].count++; return; }
+    if (g_nCallers < 32) g_callers[g_nCallers++] = { key, 1 };
+    uint8_t* sl = self + 0x3050 + slot * kSlotStride;
+    char b[256]; int k = 0; for (int i = 0; i < n; i++) k += snprintf(b + k, sizeof b - k, " %08X", st[i]);
+    log("[callers] slot %d car %d (%s) state %d flags %08X pid %d driver %d | stack:%s", slot, car,
+        cars::find(car) ? cars::find(car)->name : "?", *(int*)(sl + 0x1A74), *(unsigned*)(sl + 0x1A40),
+        *(int*)(sl + 0x1A80), *(int*)(sl + 0x1A34), b);
 }
 
 // ---- slot memory: the game re-applies a slot's car at times; keep our choice
@@ -103,7 +124,7 @@ static int g_player;
 static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int flag) {
     unsigned ret = (unsigned)__builtin_return_address(0);
     if (slot < 0 || slot >= 32) return oSet(self, slot, car, paint, flag);
-    noteCaller(ret, slot, car);
+    noteCaller(ret, slot, car, self, __builtin_frame_address(0));
     if (isPlayerSlot(self, slot)) {
         if (car != g_player) { const cars::Car* c = cars::find(car); log("[player] %s (%s)", c ? c->name : "?", c ? cars::className(c->cls) : "?"); }
         g_player = car; g_slots[slot] = {};
