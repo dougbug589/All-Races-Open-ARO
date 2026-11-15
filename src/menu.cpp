@@ -94,7 +94,7 @@ static int g_order[256];
 static char g_filter[64];
 static int g_show = 0;       // 0 all, 1 my car's races, 2 my class's races
 static int g_typeSel = 0;    // 0 all, else index into g_types
-static int g_sortMode = 0;   // 0 distance, 1 name, 2 type
+static int g_sortMode = 0;   // 0 distance, 1 name
 
 struct NameCache { int evId; char name[64]; char type[32]; };
 static NameCache g_nc[256]; static int g_nnc = 0;
@@ -232,7 +232,7 @@ static void DrawMenu() {
     ImGui::SameLine(); ImGui::SetNextItemWidth(150);
     ImGui::Combo("##type", &g_typeSel, g_types, 7);
     ImGui::SameLine(); ImGui::SetNextItemWidth(150);
-    ImGui::Combo("##sort", &g_sortMode, "Nearest first\0By name\0By type\0");
+    ImGui::Combo("##sort", &g_sortMode, "Nearest first\0By name\0");
 
     static bool logged = false;
     if (!logged && n > 0) {
@@ -254,7 +254,6 @@ static void DrawMenu() {
     auto less = [&](int x, int y) {
         const NameCache &a = names(g_ev[x]), &b = names(g_ev[y]);
         if (g_sortMode == 1) return _stricmp(a.name, b.name) < 0;
-        if (g_sortMode == 2) { int c = _stricmp(a.type, b.type); if (c) return c < 0; return _stricmp(a.name, b.name) < 0; }
         float dx = g_ev[x].distKm < 0 ? 1e9f : g_ev[x].distKm, dy = g_ev[y].distKm < 0 ? 1e9f : g_ev[y].distKm;
         return dx < dy;
     };
