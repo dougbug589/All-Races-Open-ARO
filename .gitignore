@@ -1,4 +1,5 @@
 build/
 *.log
 dist/scripts/*.asi
+dist/dinput8.dll
 *.zip
