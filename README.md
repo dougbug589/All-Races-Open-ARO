@@ -12,6 +12,13 @@ A mod for **Need for Speed: Most Wanted (2012)** on PC.
   or a **real-world match**: rivals with the closest real power-to-weight to your car.
 - Most Wanted races keep their boss car. Parked jack-spot cars and intro cutscenes are left alone.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![F5 menu: every race with name, type and distance](assets/menu.png) | ![Filter: your car's own races](assets/my-car-races.png) |
+| ![Pin up to 8 races](assets/pinning.png) | ![Pinned races at the top of EasyDrive](assets/easydrive-pins.png) |
+
 ## Requirements
 
 - NFS Most Wanted (2012), Steam/Origin `NFS13.exe` (13,684,056 bytes). Other builds are detected and
