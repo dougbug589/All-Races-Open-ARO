@@ -37,6 +37,30 @@ It contains a `scripts` folder with `ARO.asi` and `ARO.ini`.
 Press **F5** in free roam for the menu. Settings are in `ARO.ini`; ARO writes `ARO.log` next to it.
 Play offline: don't take a modded game into online events.
 
+## Known limitations and plans
+
+### Opponent pace (AI that matches your car)
+ARO picks fair **cars** for your opponents, but it can't yet make the **drivers** match your car.
+In testing, a Bugatti opponent drove no faster than the Aston Martin it replaced, and real-world
+rivals for a fast car still fell behind. What we found so far:
+
+- **The AI's pace isn't tied to its car.** Giving opponents faster cars changes little.
+- **It isn't the driver profile either.** Each racer has a driver profile, and Most Wanted bosses use
+  a stronger one. Giving every opponent the boss profile, before or during a race, made no difference.
+- **The limit is probably a race-wide rule**, such as the catch-up ("rubber band") system or a pace cap
+  in each race's AI settings. Those settings are stored as numeric IDs with no readable names, so
+  finding them means tracing the AI's code by hand.
+- **Experiments are risky.** Changing unknown race settings crashed the game while a race loaded.
+
+So AI that drives to your car's level is the main goal for a future version, but there's no
+release date: it depends on finding where the game decides how fast the AI may go.
+
+### Other plans
+- Custom **number of laps** and **number of opponents** per race (needs the same kind of research;
+  some races may have a fixed number of grid spots).
+- The game's **EasyDrive › Races** list shows at most 8 rows and doesn't scroll, so ARO's pins are
+  limited to 8. The F5 menu always lists every race.
+
 ## Build
 
 `./build.sh` (needs `mingw-w64-gcc`) builds `dist/scripts/ARO.asi`; `dist/scripts/` is ready to copy into the game folder. `tools/gen_cars.py "<game folder>"` regenerates
