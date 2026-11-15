@@ -1,5 +1,7 @@
 # All Races Open [ARO]
 
+![All Races Open [ARO]](assets/banner.jpg)
+
 By freemanHL
 
 A mod for Need for Speed Most Wanted (2012) on PC
