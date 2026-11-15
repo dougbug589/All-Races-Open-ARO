@@ -18,8 +18,10 @@ Normally each car only gets its own few races. ARO opens every race to every car
 
 | | |
 |---|---|
-| ![F5 menu](assets/menu.png) | ![Your car's races](assets/my-car-races.png) |
-| ![Pinning races](assets/pinning.png) | ![Pinned races in EasyDrive](assets/easydrive-pins.png) |
+| ![F5 menu with every race](assets/menu.png) | ![Choosing opponents](assets/opponents.png) |
+| ![Only your car's races](assets/my-car-races.png) | ![Filter by race type](assets/filter-sprint.png) |
+| ![Sort by name](assets/sort-by-name.png) | ![Search and pin a race](assets/search-pin.png) |
+| ![Eight races pinned](assets/pinning.png) | ![Pinned races in EasyDrive](assets/easydrive-pins.png) |
 
 ## Download
 
