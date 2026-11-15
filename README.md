@@ -1,19 +1,18 @@
 # All Races Open [ARO]
 
-A mod for Need for Speed: Most Wanted (2012) on PC.
+A mod for Need for Speed Most Wanted (2012) on PC
 
-In the normal game each car only gets its own handful of races. ARO opens every race to every car,
-and adds a small menu (F5) so you can find and pick races easily.
+Normally each car only gets its own few races. ARO opens every race to every car and adds an F5 menu to find and pick races
 
 ## What it does
 
-- Every race works with every car. The map shows the 20 races closest to you.
-- You still only get parts when you win a race in the car it was made for. Other cars get Speed Points.
-- F5 menu with all 93 races: names, types, distance, search and filters.
-- Pin up to 8 races and they show up at the top of EasyDrive > Races.
-- Pick who you race against: cars from your class, any class you want, or "real-world match"
-  (cars with similar real-life power-to-weight to yours).
-- Most Wanted races, jack spots and parked cars are left alone.
+- Every race works with every car
+- The map shows the 20 races closest to you
+- Parts still only come from winning a race in the car it was made for
+- F5 menu lists all 93 races with name and type and distance
+- Search and filter races or pin up to 8 to the top of EasyDrive > Races
+- Choose your opponents from your class or any class or a real world match with similar power to weight
+- Most Wanted races and jack spots and parked cars are left alone
 
 ## Screenshots
 
@@ -24,48 +23,47 @@ and adds a small menu (F5) so you can find and pick races easily.
 
 ## Download
 
-Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest).
+Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest)
 
 ## Install
 
-1. Get `Ultimate-ASI-Loader.zip` (the 32-bit one) from
-   [ThirteenAG's releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest)
-   and put `dinput8.dll` next to `NFS13.exe`.
-2. Unzip `ARO.zip` into the game folder. It has a `scripts` folder inside.
-3. On Linux / Steam Deck, set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`.
+1. Download the 32-bit `Ultimate-ASI-Loader.zip` from [ThirteenAG's releases](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest) and put `dinput8.dll` next to `NFS13.exe`
+2. Unzip `ARO.zip` into the game folder so the `scripts` folder lands there
+3. On Linux or Steam Deck set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`
 
-Press F5 in free roam to open the menu. Settings are in `scripts/ARO.ini`.
-Play offline with it.
+Press F5 in free roam to open the menu  
+Settings live in `scripts/ARO.ini`  
+Play offline with mods
 
 ## Known issues
 
-- The AI doesn't get faster when it gets a faster car. Opponents in fast cars can still fall behind.
-  I tried swapping their cars and even giving them the Most Wanted boss driver, and neither helped.
-  The game seems to limit AI speed somewhere in each race's settings, which I haven't found yet.
-- EasyDrive can only show 8 races, so you can only pin 8.
+- The AI doesn't get faster in a faster car so opponents can fall behind
+- Swapping their cars or giving them the Most Wanted boss driver didn't help
+- The speed limit seems to sit somewhere in each race's settings and hasn't been found yet
+- EasyDrive only shows 8 races so you can pin 8 at most
 
 ## Plans
 
-- AI that keeps up with your car (the big one)
+- AI that keeps up with your car
 - Custom number of laps and opponents
 
 ## Building
 
-You need `mingw-w64-gcc`. Run `./build.sh` and the files end up in `dist/scripts/`.
-`tools/gen_cars.py` rebuilds the car list from the game files. Notes on the game internals are in `NOTES.md`.
+You need `mingw-w64-gcc`  
+Run `./build.sh` and the files end up in `dist/scripts/`  
+`tools/gen_cars.py` rebuilds the car list from the game files  
+Notes on the game internals are in `NOTES.md`
 
 ## AI use
 
-This mod was made with a lot of help from AI (Claude, by Anthropic). To be clear about who did what:
+This mod was made with a lot of help from AI (Claude by Anthropic)
 
-- **Claude** wrote most of the code, dug through the game's code to find how races and opponents work,
-  and wrote these docs.
-- **I** came up with the idea and features, decided what goes in and what doesn't, tested everything
-  in game, found the bugs (like the jack spot one) and checked every fix.
+- Claude wrote most of the code and figured out how the game handles races and opponents and wrote these docs
+- I came up with the idea and the features and decided what goes in and tested every build in game and found the bugs and checked every fix
 
-Everything in the release has been played and tested by me, but keep in mind it was mostly written by AI.
+Everything here was played and tested by me but most of it was written by AI
 
 ## Credits
 
-MIT licence. Uses [Dear ImGui](https://github.com/ocornut/imgui) and [miniz](https://github.com/richgel999/miniz)
-(both MIT).
+MIT licence  
+Uses [Dear ImGui](https://github.com/ocornut/imgui) and [miniz](https://github.com/richgel999/miniz) which are both MIT
