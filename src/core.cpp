@@ -40,6 +40,7 @@ void loadSettings(const char* ini) {
     cfg.randomPaint     = readBool(ini, "RandomPaint", true);
     cfg.keepMostWanted  = readBool(ini, "KeepMostWantedBoss", true);
     cfg.uniqueOpponents = readBool(ini, "UniqueOpponents", true);
+    cfg.maxSwaps        = GetPrivateProfileIntA("ARO", "MaxSwappedOpponents", 7, ini);
     cfg.notMyCar        = readBool(ini, "NeverGiveOpponentsMyCar", true);
     cfg.fixNewBadge     = readBool(ini, "FixNewBadge", true);
     cfg.menu            = readBool(ini, "Menu", true);

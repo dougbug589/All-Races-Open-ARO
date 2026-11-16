@@ -15,6 +15,7 @@ struct Settings {
     bool randomPaint = true;
     bool keepMostWanted = true;   // Most Wanted races keep their boss car
     bool uniqueOpponents = true;
+    int maxSwaps = 7;             // per race: opponents past this many keep their original cars (big grids)
     bool notMyCar = true;         // opponents never get the car you drive
     bool fixNewBadge = true;
     bool menu = true;             // F5 overlay

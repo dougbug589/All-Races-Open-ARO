@@ -5,6 +5,9 @@
 //   - never the player's slot or the car the player is driving (cutscenes use other slots),
 //   - never Most Wanted boss racers (when KeepMostWantedBoss=1),
 //   - never cars that aren't entered in a race (participant id -1: jack spots and parked cars).
+// A few races have 11 opponents. Giving all of them different cars is more than the game can
+// load and the race never starts, so only the first MaxSwappedOpponents get new cars and the
+// rest keep their original ones (then the race never needs more car models than it normally does).
 #include "opponents.h"
 #include "core.h"
 #include "cars.h"
@@ -42,6 +45,7 @@ static int randomPaint() {
 
 // ---- picking
 static int g_recent[16]; static int g_nRecent; static DWORD g_lastPick;
+static int g_nSwaps;   // opponents given a new car in the race being loaded
 static bool recent(int id) { for (int i = 0; i < g_nRecent; i++) if (g_recent[i] == id) return true; return false; }
 
 static int pickByClass(int cls, int player) {
@@ -162,8 +166,15 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
         if (state != 1 || now - p->at < 60 * 1000) { p->at = now; return oSet(self, slot, p->chosen, p->paint, flag); }
     }
 
-    if (now - g_lastPick > 8000) g_nRecent = 0;
+    if (now - g_lastPick > 8000) { g_nRecent = 0; g_nSwaps = 0; }   // a new race is being loaded
     g_lastPick = now;
+    if (core::cfg.maxSwaps >= 0 && g_nSwaps >= core::cfg.maxSwaps) {
+        // big grid: this racer keeps its car (remembered, so a respawn gets it back too)
+        *newPick(racer) = { racer, car, car, paint, now };
+        log("[opponents] slot %d (racer %d) keeps %s - big race, %d opponents already got new cars", slot, racer, orig->name, g_nSwaps);
+        return oSet(self, slot, car, paint, flag);
+    }
+    g_nSwaps++;
     int m = g_mode, pick = 0;
     if (m == RealWorld) pick = pickRealWorld(g_player);
     if (!pick) pick = pickByClass(m >= 0 && m < cars::ClassCount ? m : me->cls, g_player);
