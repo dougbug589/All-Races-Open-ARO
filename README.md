@@ -30,7 +30,7 @@ Normally each car only gets its own few races. ARO opens every race to every car
 
 ## Download
 
-Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/needforspeedmostwanted2012/mods/133)  
+Get `ARO.zip` from the [latest release](https://github.com/dougbug589/All-Races-Open-ARO/releases/latest), [Nexus Mods](https://www.nexusmods.com/needforspeedmostwanted2012/mods/133) or [NFSMods](https://nfsmods.xyz/mod/8182)  
 It has the `scripts` folder and ThirteenAG's [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) (`dinput8.dll`) so there's nothing else to download
 
 ## Install
