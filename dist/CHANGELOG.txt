@@ -1,0 +1,29 @@
+ARO - All Races Open - Changelog
+
+v1.2 (2026-11-17)
+- Get To Callahan and Round Trip load again. They have 11 opponents and the game
+  couldn't load that many swapped cars so the race never started. In those two
+  races opponents now keep their own cars (KeepOpponentsIn in scripts/ARO.ini)
+- New MenuKey setting in scripts/ARO.ini to open the menu with another key if F5
+  doesn't work on your keyboard, for example MenuKey=Insert
+- Less work every frame, which should fix the FPS drop some players saw on Windows.
+  Empty gamepad slots are checked every 2 seconds instead of every frame and nothing
+  is drawn while the menu is closed
+- The log doesn't write to disk for every parked or traffic car any more
+- Updating from v1.1: replace scripts/ARO.asi and scripts/ARO.ini
+
+v1.1 (2026-11-15)
+- Full keyboard and gamepad control for the menu
+- L3+R3 opens and closes the menu on a gamepad
+- The game ignores your keys and buttons while the menu is open
+- Pinned races wrap onto a new line
+- Type filter now has Drift Attack and Smash And Grab
+- Removed the By type sort
+- The zip now includes ThirteenAG's Ultimate ASI Loader (dinput8.dll)
+
+v1.0 (2026-11-15)
+- First release
+- Every race works with every car
+- F5 menu with all races plus search, filters and pins for EasyDrive
+- Choose your opponents from your class, any class or a real world match
+- Jack spots, parked cars and Most Wanted races are left alone
