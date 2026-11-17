@@ -5,9 +5,9 @@
 //   - never the player's slot or the car the player is driving (cutscenes use other slots),
 //   - never Most Wanted boss racers (when KeepMostWantedBoss=1),
 //   - never cars that aren't entered in a race (participant id -1: jack spots and parked cars).
-// A few races have 11 opponents. Giving all of them different cars is more than the game can
-// load and the race never starts, so only the first MaxSwappedOpponents get new cars and the
-// rest keep their original ones (then the race never needs more car models than it normally does).
+// A few races (Get To Callahan, Round Trip) have 11 opponents. Swapped cars there are more than
+// the game can load and the race never starts, so in the events listed in KeepOpponentsIn every
+// opponent keeps its own car. The event being loaded is the game's current event id.
 #include "opponents.h"
 #include "core.h"
 #include "cars.h"
@@ -45,7 +45,13 @@ static int randomPaint() {
 
 // ---- picking
 static int g_recent[16]; static int g_nRecent; static DWORD g_lastPick;
-static int g_nSwaps;   // opponents given a new car in the race being loaded
+static int g_raceEvent; static bool g_keepRace;   // the race being loaded, and whether its opponents keep their cars
+
+// the event the game is loading or running: [root+0x2F6F8] (390703 in free roam)
+static int currentEvent() {
+    u32 root = core::deref(kRootPtrAlt); if (!root || !core::readable(root + kRootCurrentEvent)) return 0;
+    return *(int*)(root + kRootCurrentEvent);
+}
 static bool recent(int id) { for (int i = 0; i < g_nRecent; i++) if (g_recent[i] == id) return true; return false; }
 
 static int pickByClass(int cls, int player) {
@@ -171,25 +177,17 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     }
 
     if (now - g_lastPick > 8000) {                                    // a new race is being loaded
-        g_nRecent = 0; g_nSwaps = 0;
-        if (core::cfg.logCallers) {   // which slots already have a race participant when the first opponent spawns
-            char b[256]; int k = 0, n = 0;
-            for (int i = 1; i < 32 && k < 200; i++) {
-                int* pp = (int*)(self + i * kSlotStride + kSlotPlayerId); if (!core::readable(pp)) break;
-                int pid = *pp;
-                if (pid != -1) { k += snprintf(b + k, sizeof b - k, " %d:%d", i, pid); n++; }
-            }
-            log("[grid] first opponent in slot %d: %d slots already in the race:%s", slot, n, b);
-        }
+        g_nRecent = 0;
+        g_raceEvent = currentEvent(); g_keepRace = false;
+        for (int i = 0; i < core::cfg.nKeepEvents; i++) if (core::cfg.keepEvents[i] == g_raceEvent) g_keepRace = true;
+        log("[opponents] race %d%s", g_raceEvent, g_keepRace ? " - in KeepOpponentsIn, opponents keep their cars" : "");
     }
     g_lastPick = now;
-    if (core::cfg.maxSwaps >= 0 && g_nSwaps >= core::cfg.maxSwaps) {
-        // big grid: this racer keeps its car (remembered, so a respawn gets it back too)
+    if (g_keepRace) {   // remembered, so a respawn gets the same car back too
         *newPick(racer) = { racer, car, car, paint, now };
-        log("[opponents] slot %d (racer %d) keeps %s - big race, %d opponents already got new cars", slot, racer, orig->name, g_nSwaps);
+        log("[opponents] slot %d (racer %d) keeps %s - race %d is in KeepOpponentsIn", slot, racer, orig->name, g_raceEvent);
         return oSet(self, slot, car, paint, flag);
     }
-    g_nSwaps++;
     int m = g_mode, pick = 0;
     if (m == RealWorld) pick = pickRealWorld(g_player);
     if (!pick) pick = pickByClass(m >= 0 && m < cars::ClassCount ? m : me->cls, g_player);

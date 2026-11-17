@@ -64,7 +64,13 @@ void loadSettings(const char* ini) {
     cfg.randomPaint     = readBool(ini, "RandomPaint", true);
     cfg.keepMostWanted  = readBool(ini, "KeepMostWantedBoss", true);
     cfg.uniqueOpponents = readBool(ini, "UniqueOpponents", true);
-    cfg.maxSwaps        = GetPrivateProfileIntA("ARO", "MaxSwappedOpponents", 7, ini);
+    char list[400]; GetPrivateProfileStringA("ARO", "KeepOpponentsIn", "2189981,2193106", list, sizeof list, ini);
+    cfg.nKeepEvents = 0;
+    for (char* p = list; *p && cfg.nKeepEvents < 32; ) {        // comma or space separated event ids
+        long id = strtol(p, &p, 10);
+        if (id > 0) cfg.keepEvents[cfg.nKeepEvents++] = (int)id;
+        while (*p && (*p < '0' || *p > '9')) p++;
+    }
     cfg.notMyCar        = readBool(ini, "NeverGiveOpponentsMyCar", true);
     cfg.fixNewBadge     = readBool(ini, "FixNewBadge", true);
     cfg.menu            = readBool(ini, "Menu", true);

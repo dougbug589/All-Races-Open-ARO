@@ -20,6 +20,7 @@ constexpr u32 kRootPlayerCar  = 0x2F3DC;   // -> player vehicle owner
 constexpr u32 kRootPlayer     = 0x2F480;   // -> player object; position at +0x2CD50
 constexpr u32 kPlayerPos      = 0x2CD50;
 constexpr u32 kRootUnlocks    = 0x29200;   // event-unlock state
+constexpr u32 kRootCurrentEvent = 0x2F6F8;  // id of the event being loaded/run (390703 = free roam)
 
 // ---- event table (per EasyDrive entry) ----
 // table: +0x10 record pointer array, +0x14 u16 count
