@@ -34,8 +34,16 @@ static DWORD WINAPI hkXGetStateEx(DWORD i, XINPUT_STATE* s) {
     return r;
 }
 
+// Asking XInput about an empty controller slot is slow on Windows (it searches for the device),
+// so a slot that had no pad is only checked again every 2 seconds.
+static DWORD g_padRetry[4];
 bool padState(int index, XINPUT_STATE* out) {
-    return oXGetState && oXGetState((DWORD)index, out) == ERROR_SUCCESS;
+    if (!oXGetState || index < 0 || index > 3) return false;
+    DWORD now = GetTickCount();
+    if (g_padRetry[index] && now - g_padRetry[index] < 2000) return false;
+    if (oXGetState((DWORD)index, out) == ERROR_SUCCESS) { g_padRetry[index] = 0; return true; }
+    g_padRetry[index] = now ? now : 1;
+    return false;
 }
 
 // Point an export of a loaded DLL at our function (export table holds RVAs from the DLL base).

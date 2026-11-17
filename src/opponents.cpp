@@ -156,7 +156,11 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
     else if (*(int*)(self + slot * kSlotStride + kSlotPlayerId) == -1) keep = "not in a race (jack spot / parked car)";
     else if (core::cfg.keepMostWanted && *(int*)(self + slot * kSlotStride + kSlotDriver) == kBossDriver) keep = "Most Wanted boss";
     else if (!me) keep = "your car is unknown";
-    if (keep) { log("[opponents] slot %d keeps %d (%s) - %s", slot, car, orig ? orig->name : "?", keep); return oSet(self, slot, car, paint, flag); }
+    if (keep) {
+        bool routine = !orig || *(int*)(self + slot * kSlotStride + kSlotPlayerId) == -1;   // traffic, parked and jack-spot cars
+        if (!routine || core::cfg.logCallers) log("[opponents] slot %d keeps %d (%s) - %s", slot, car, orig ? orig->name : "?", keep);
+        return oSet(self, slot, car, paint, flag);
+    }
 
     DWORD now = GetTickCount();
     int racer = *(int*)(self + slot * kSlotStride + kSlotPlayerId);
@@ -166,7 +170,18 @@ static int __thiscall hkSet(uint8_t* self, int slot, int car, int paint, int fla
         if (state != 1 || now - p->at < 60 * 1000) { p->at = now; return oSet(self, slot, p->chosen, p->paint, flag); }
     }
 
-    if (now - g_lastPick > 8000) { g_nRecent = 0; g_nSwaps = 0; }   // a new race is being loaded
+    if (now - g_lastPick > 8000) {                                    // a new race is being loaded
+        g_nRecent = 0; g_nSwaps = 0;
+        if (core::cfg.logCallers) {   // which slots already have a race participant when the first opponent spawns
+            char b[256]; int k = 0, n = 0;
+            for (int i = 1; i < 32 && k < 200; i++) {
+                int* pp = (int*)(self + i * kSlotStride + kSlotPlayerId); if (!core::readable(pp)) break;
+                int pid = *pp;
+                if (pid != -1) { k += snprintf(b + k, sizeof b - k, " %d:%d", i, pid); n++; }
+            }
+            log("[grid] first opponent in slot %d: %d slots already in the race:%s", slot, n, b);
+        }
+    }
     g_lastPick = now;
     if (core::cfg.maxSwaps >= 0 && g_nSwaps >= core::cfg.maxSwaps) {
         // big grid: this racer keeps its car (remembered, so a respawn gets it back too)

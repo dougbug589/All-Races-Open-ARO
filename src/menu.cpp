@@ -328,7 +328,8 @@ static void pollToggle() {
 static HRESULT __stdcall hkPresent(IDXGISwapChain* sc, UINT sync, UINT flags) {
     if (!g_init && !g_failed) initImGui(sc);
     pollToggle();
-    if (g_init) {
+    bool showHint = GetTickCount() - g_startTick < 15000;
+    if (g_init && (g_open || showHint)) {   // nothing to draw while the menu is closed: leave the frame alone
         DXGI_SWAP_CHAIN_DESC sd; sc->GetDesc(&sd);
         if (sd.OutputWindow == g_hwnd) {
             if (!g_rtv) createRTV(sc);
@@ -336,7 +337,7 @@ static HRESULT __stdcall hkPresent(IDXGISwapChain* sc, UINT sync, UINT flags) {
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
             if (g_open) DrawMenu();
-            else if (GetTickCount() - g_startTick < 15000) {
+            else if (showHint) {
                 ImGui::SetNextWindowPos(ImVec2(20, 60));
                 ImGui::SetNextWindowBgAlpha(0.6f);
                 ImGui::Begin("##hint", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings);

@@ -27,7 +27,7 @@ void log(const char* fmt, ...) {
     if (n > (int)sizeof b - 3) n = sizeof b - 3;
     b[n++] = '\r'; b[n++] = '\n';
     EnterCriticalSection(&g_logLock);
-    DWORD w; WriteFile(g_log, b, n, &w, nullptr); FlushFileBuffers(g_log);
+    DWORD w; WriteFile(g_log, b, n, &w, nullptr);
     LeaveCriticalSection(&g_logLock);
 }
 
