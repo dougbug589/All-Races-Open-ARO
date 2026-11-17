@@ -49,7 +49,7 @@ static void setOpen(bool open) {
 }
 
 static LRESULT CALLBACK WndProcHook(HWND h, UINT m, WPARAM w, LPARAM l) {
-    if (m == WM_KEYDOWN && w == VK_F5 && !(l & (1 << 30))) { setOpen(!g_open); return 0; }
+    if ((m == WM_KEYDOWN || m == WM_SYSKEYDOWN) && (int)w == core::cfg.menuKey && !(l & (1 << 30))) { setOpen(!g_open); return 0; }
     if (g_open && g_init) {
         ImGui_ImplWin32_WndProcHandler(h, m, w, l);
         if (isInputMsg(m)) return 0;   // keep menu clicks/keys away from the game while it is open
@@ -89,7 +89,7 @@ static void initImGui(IDXGISwapChain* sc) {
     createRTV(sc);
     lang::load("0001.BNDL");
     g_init = true;
-    logf("[overlay] ready on %ux%u window - press F5 in game", sd.BufferDesc.Width, sd.BufferDesc.Height);
+    logf("[overlay] ready on %ux%u window - press %s in game", sd.BufferDesc.Width, sd.BufferDesc.Height, core::cfg.menuKeyName);
 }
 
 // ---------------- menu ----------------
@@ -181,7 +181,8 @@ static void DrawMenu() {
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.55f, io.DisplaySize.y * 0.82f), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
     if (g_justOpened) ImGui::SetNextWindowFocus();
-    if (!ImGui::Begin("ARO - All Races Open  (F5 or L3+R3 to close)", nullptr, ImGuiWindowFlags_NoCollapse)) { ImGui::End(); return; }
+    char title[96]; snprintf(title, sizeof title, "ARO - All Races Open  (%s or L3+R3 to close)###aro", core::cfg.menuKeyName);
+    if (!ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoCollapse)) { ImGui::End(); return; }
     if (g_justOpened) { g_justOpened = false; ImGui::SetNavCursorVisible(true); }
     // Esc / gamepad B closes the menu when nothing else (a dropdown, the search box) wants it
     bool popup = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
@@ -339,7 +340,7 @@ static HRESULT __stdcall hkPresent(IDXGISwapChain* sc, UINT sync, UINT flags) {
                 ImGui::SetNextWindowPos(ImVec2(20, 60));
                 ImGui::SetNextWindowBgAlpha(0.6f);
                 ImGui::Begin("##hint", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings);
-                ImGui::Text("ARO loaded - press F5 (or L3+R3 on a gamepad)");
+                ImGui::Text("ARO loaded - press %s (or L3+R3 on a gamepad)", core::cfg.menuKeyName);
                 ImGui::End();
             }
             ImGui::Render();

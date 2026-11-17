@@ -1,5 +1,6 @@
 // core.cpp - logging, settings, memory helpers and inline hooks.
 #include "core.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -30,6 +31,29 @@ void log(const char* fmt, ...) {
     LeaveCriticalSection(&g_logLock);
 }
 
+// "F5", "F12", "Insert", "Home", "End", "PageUp", "PageDown", "Delete", "Pause", "ScrollLock",
+// a single letter or digit ("M", "0"), or a virtual-key code ("0x2D"). 0 = not recognised.
+static int keyFromName(char* s) {
+    while (*s == ' ' || *s == '\t') s++;
+    char* e = s + lstrlenA(s); while (e > s && (e[-1] == ' ' || e[-1] == '\t' || e[-1] == '\r')) *--e = 0;
+    if (!*s) return 0;
+    if ((s[0] == 'F' || s[0] == 'f') && s[1] >= '1' && s[1] <= '9') {
+        int n = atoi(s + 1); if (n >= 1 && n <= 24) return VK_F1 + n - 1;
+    }
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) { int v = (int)strtol(s, nullptr, 16); return v > 0 && v < 0xFF ? v : 0; }
+    if (!s[1]) {
+        char c = s[0]; if (c >= 'a' && c <= 'z') c -= 32;
+        if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) return c;
+        return 0;
+    }
+    static const struct { const char* n; int vk; } names[] = {
+        {"Insert", VK_INSERT}, {"Home", VK_HOME}, {"End", VK_END}, {"PageUp", VK_PRIOR}, {"PageDown", VK_NEXT},
+        {"Delete", VK_DELETE}, {"Pause", VK_PAUSE}, {"ScrollLock", VK_SCROLL}, {"Backquote", VK_OEM_3},
+    };
+    for (auto& k : names) if (!lstrcmpiA(s, k.n)) return k.vk;
+    return 0;
+}
+
 static bool readBool(const char* ini, const char* key, bool def) {
     return GetPrivateProfileIntA("ARO", key, def ? 1 : 0, ini) != 0;
 }
@@ -44,6 +68,8 @@ void loadSettings(const char* ini) {
     cfg.notMyCar        = readBool(ini, "NeverGiveOpponentsMyCar", true);
     cfg.fixNewBadge     = readBool(ini, "FixNewBadge", true);
     cfg.menu            = readBool(ini, "Menu", true);
+    char key[32]; GetPrivateProfileStringA("ARO", "MenuKey", "F5", key, sizeof key, ini);
+    if (int vk = keyFromName(key)) { cfg.menuKey = vk; lstrcpynA(cfg.menuKeyName, key, sizeof cfg.menuKeyName); }
     cfg.devProbe        = readBool(ini, "DevProbe", false);
     cfg.logCallers      = readBool(ini, "LogCallers", true);
 }

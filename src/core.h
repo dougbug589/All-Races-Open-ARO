@@ -19,6 +19,8 @@ struct Settings {
     bool notMyCar = true;         // opponents never get the car you drive
     bool fixNewBadge = true;
     bool menu = true;             // F5 overlay
+    int menuKey = 0x74;           // virtual-key code that opens the menu (VK_F5); MenuKey= in ARO.ini
+    char menuKeyName[16] = "F5";
     bool devProbe = false;        // developer memory probe on 127.0.0.1:47777
     bool logCallers = true;       // log who asks for a racer car (jack spot vs race)
 };
