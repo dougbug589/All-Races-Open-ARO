@@ -39,6 +39,7 @@ It has the `scripts` folder and ThirteenAG's [Ultimate ASI Loader](https://githu
 2. On Linux or Steam Deck set the launch options to `WINEDLLOVERRIDES="dinput8=n,b" %command%`
 
 Press F5 in free roam to open the menu or L3+R3 on a gamepad  
+If F5 doesn't work on your keyboard pick another key with `MenuKey` in `scripts/ARO.ini` like `MenuKey=Insert`  
 Use the arrows and Enter or the D-pad and A to move and pick and Esc or B to close  
 The game ignores your keys and buttons while the menu is open  
 Settings live in `scripts/ARO.ini`  
@@ -52,6 +53,7 @@ Made and tested on CachyOS with an NVIDIA GPU using the proton-cachyos-slr runne
 - Swapping their cars or giving them the Most Wanted boss driver didn't help
 - The speed limit seems to sit somewhere in each race's settings and hasn't been found yet
 - EasyDrive only shows 8 races so you can pin 8 at most
+- Get To Callahan and Round Trip have 11 opponents and the game can't load that many swapped cars so in those two races opponents keep their own cars (`KeepOpponentsIn` in `scripts/ARO.ini`)
 
 ## Plans
 
